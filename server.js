@@ -10,7 +10,6 @@ const tareas = [
     { id: 4, description: "caminar", state: true },
     { id: 5, description: "estudiar", state: false },
     { id: 6, description: "dormir", state: true },
-    { id: 7, description: "trabajar", state: false }
   ];
 
   const server = http.createServer((req, res) => {
