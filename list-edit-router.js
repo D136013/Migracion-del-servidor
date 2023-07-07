@@ -1,45 +1,79 @@
-const express = require("express")
+const express = require('express');
+const router = express.Router();
 
-let tareasJson = require('./tareas.json')
+const tasks = require('./tasks.json');
 
-const router = express.Router()
 
-router.get('/', (req, res) => {
-  res.send('Ruta para crear, editar y actualizar tareas (list-edit-router)');
-})
+const validatePostRequest = (req, res, next) => {
+  if (req.method === 'POST') {
+    if (!req.body || Object.keys(req.body).length === 0) {
+      return res.status(400).json({ error: 'Empty request body' });
+    }
 
-router.post('/', (req, res) => {
-  let nuevaTarea = req.body; // Obtener la tarea desde el cuerpo de la solicitud
-  tareasJson.push(nuevaTarea); // Agregar nueva tarea
-  console.log(tareasJson)
-  res.send('Tarea creada');
-});
-
-router.delete('/', (req, res) => {
-  let tareaId = req.params.id;
-  let tareaIndex = tareasJson.findIndex((tarea) => tarea.id == tareaId);
-  
-if (tareaIndex >=0) {
-  tareasJson = tareasJson.filter((tarea) => tareaId != tareaId);// utiliza el metodo filter para eliminar tarea
-  console.log(tareasJson)
-  res.send('Tarea eliminada');
-} else {
-  res.status(404).send('Tarea no encontrada')
-}
-});
-
-router.put('/', (req, res) => {
-  let tareaId = req.params.id;
-  let tareaIndex = tareasJson.findIndex((tarea) => tarea.id == tareaId);
-
-  if (tareaIndex >= 0) {
-    let tareaActualizada = req.body;
-    tareasJson = tareasJson.map((tarea) => (tarea.id == tareaId ? tareaActualizada : tarea));//Utiliza el metodo map para actualizar la tarea por ID
-    res.send('Tarea Actualizada')
-    console.log(tareasJson)
-  } else {
-    res.status(404).send('Tarea no encontrada');
+    const { description } = req.body;
+    if (!description) {
+      return res.status(400).json({ error: 'Invalid or missing task description' });
+    }
   }
+
+  next();
+};
+
+
+const validatePutRequest = (req, res, next) => {
+  if (req.method === 'PUT') {
+    if (!req.body || Object.keys(req.body).length === 0) {
+      return res.status(400).json({ error: 'Empty request body' });
+    }
+
+    const { description, isCompleted } = req.body;
+    if (!description && !isCompleted) {
+      return res.status(400).json({ error: 'Invalid or missing task information' });
+    }
+  }
+
+  next();
+};
+
+router.post('/', validatePostRequest, (req, res) => {
+  const { description } = req.body;
+  const newTask = {
+    id: tasks.length + 1,
+    description,
+    completed: false
+  };
+
+  tasks.push(newTask);
+
+  res.status(201).json(newTask);
+});
+
+router.delete('/:id', (req, res) => {
+  const taskId = parseInt(req.params.id);
+  const taskIndex = tasks.findIndex(task => task.id === taskId);
+
+  if (taskIndex === -1) {
+    return res.status(404).json({ error: 'Task not found' });
+  }
+
+  tasks.splice(taskIndex, 1);
+
+  res.json({ message: 'Task deleted' });
+});
+
+router.put('/:id', validatePutRequest, (req, res) => {
+  const taskId = parseInt(req.params.id);
+  const { description, completed } = req.body;
+  const taskIndex = tasks.findIndex(task => task.id === taskId);
+
+  if (taskIndex === -1) {
+    return res.status(404).json({ error: 'Task not found' });
+  }
+
+  tasks[taskIndex].description = description || tasks[taskIndex].description;
+  tasks[taskIndex].completed = completed || tasks[taskIndex].completed;
+
+  res.json(tasks[taskIndex]);
 });
 
 module.exports = router;
