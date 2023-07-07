@@ -1,18 +1,28 @@
 {
   "name": "migracion-de-servidor",
   "version": "1.0.0",
-  "description": "",
+  "description": "autenticacion",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon server.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "diego florez",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.1",
     "nodemon": "^2.0.22"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/D136013/Migracion-del-servidor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/D136013/Migracion-del-servidor/issues"
+  },
+  "homepage": "https://github.com/D136013/Migracion-del-servidor#readme"
 }
-

@@ -1,24 +1,38 @@
-const  http = require('http');
+const express = require('express');
+const listViewRouter = require('./list-view-router');
+const listEditRouter = require('./list-edit-router');
+const jwt = require('jsonwebtoken');
 
-const host = "localhost";
-const port = 8080
+const app = express();
 
-const tareas = [
-    { id: 1, description: "correr", state: true},
-    { id: 2, description: "saltar", state: false },
-    { id: 3, description: "jugar", state: true },
-    { id: 4, description: "caminar", state: true },
-    { id: 5, description: "estudiar", state: false },
-    { id: 6, description: "dormir", state: true },
-  ];
+app.use(express.json());
 
-  const server = http.createServer((req, res) => {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.write(JSON.stringify(tareas))
-    res.end();
+
+app.get("/", (req, res)=>{
+  res.send("el servidor esta corriendo correctamente")
+})
+
+// Función de autenticación de token
+function authenticateToken(req, res, next) {
+  const token = req.headers.authorization;
+
+  // Verificar la validez del token
+  jwt.verify(token, (err, user) => {
+    if (err) {
+      res.status(401).json({ error: 'Unauthorized' }); // Autenticación fallida
+    } else {
+      // Almacenar la información del usuario en req.user
+      req.user = user;
+      next(); // Autenticación exitosa, continuar
+    }
   });
-  
+}
 
-server.listen(port, host, () => {
-console.log(`servidor funcionando en http://${host}:${port}`)
+app.use('/tasks/edit', authenticateToken);
+
+app.use('/tasks/view', listViewRouter);
+app.use('/tasks/edit', listEditRouter);
+
+app.listen(8080, () => {
+  console.log(`Server is running on port 8080`);
 });
